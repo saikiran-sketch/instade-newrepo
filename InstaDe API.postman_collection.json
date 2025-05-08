@@ -1,0 +1,2463 @@
+{
+	"info": {
+		"_postman_id": "f39aa4c7-2752-4a01-86d5-83c4019a82ef",
+		"name": "InstaDe API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36020484",
+		"_collection_link": "https://team77-8239.postman.co/workspace/InstaDe-API~9d3ed3ab-d2ba-4fde-90c3-19943fe9c5c0/collection/36020484-f39aa4c7-2752-4a01-86d5-83c4019a82ef?action=share&source=collection_link&creator=36020484"
+	},
+	"item": [
+		{
+			"name": "Signup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse response JSON\r",
+							"let response = pm.response.json();\r",
+							"\r",
+							"// Check if signup was successful\r",
+							"if (pm.response.code === 200) {\r",
+							"    console.log(\"✅ Signup was successful!\");\r",
+							"\r",
+							"    // Store email\r",
+							"    if (response.user && response.user.Id_emailaddress) {\r",
+							"        let apiEmail = response.user.Id_emailaddress;\r",
+							"        pm.environment.set(\"email\", apiEmail);\r",
+							"        console.log(\"✅ Stored Email:\", apiEmail);\r",
+							"    } else {\r",
+							"        console.log(\"⚠ No email found in response.\");\r",
+							"    }\r",
+							"\r",
+							"} else {\r",
+							"    console.log(\"❌ Signup failed! Status Code:\", pm.response.code);\r",
+							"}\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Function to generate a random string\r",
+							"function getRandomString(length, chars) {\r",
+							"    let result = '';\r",
+							"    for (let i = 0; i < length; i++) {\r",
+							"        result += chars.charAt(Math.floor(Math.random() * chars.length));\r",
+							"    }\r",
+							"    return result;\r",
+							"}\r",
+							"\r",
+							"// Generate random values\r",
+							"let randomFirstName = \"Sai\" + getRandomString(5, 'abcdefghijklmnopqrstuvwxyz');\r",
+							"let randomLastName = \"Kiran\" + getRandomString(5, 'abcdefghijklmnopqrstuvwxyz');\r",
+							"let randomEmail = `test${Math.floor(1000 + Math.random() * 9000)}@gmail.com`;\r",
+							"\r",
+							"// Generate random password (8 to 12 characters)\r",
+							"let passwordLength = Math.floor(Math.random() * 5) + 8; // Random length between 8 and 12\r",
+							"let randomPassword = \r",
+							"    getRandomString(1, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') +  // 1 Uppercase\r",
+							"    getRandomString(1, 'abcdefghijklmnopqrstuvwxyz') +  // 1 Lowercase\r",
+							"    getRandomString(1, '0123456789') +                 // 1 Number\r",
+							"    getRandomString(1, '!@#$%^&*') +                   // 1 Special Character\r",
+							"    getRandomString(passwordLength - 4, 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'); // Remaining\r",
+							"\r",
+							"// Shuffle the password characters (for better randomness)\r",
+							"randomPassword = randomPassword.split('').sort(() => Math.random() - 0.5).join('');\r",
+							"\r",
+							"// Store generated values in environment variables\r",
+							"pm.environment.set(\"firstname\", randomFirstName);\r",
+							"pm.environment.set(\"lastname\", randomLastName);\r",
+							"pm.environment.set(\"email\", randomEmail);\r",
+							"pm.environment.set(\"password\", randomPassword);\r",
+							"\r",
+							"// Log everything in a single block for better readability\r",
+							"console.log(`\r",
+							"✅ Generating User Details:\r",
+							"First Name: ${randomFirstName}\r",
+							"Last Name: ${randomLastName}\r",
+							"Email: ${randomEmail}\r",
+							"Password: ${randomPassword} (Hidden in actual tests)\r",
+							"`);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"Id_firstname\": \"{{firstname}}\",\r\n  \"Id_lastname\": \"{{lastname}}\",\r\n  \"Id_emailaddress\": \"{{email}}\",\r\n  \"Id_password\": \"{{password}}\",\r\n  \"consent_timestamp\": \"2024-10-21T09:50:53.210298Z\"\r\n}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/signup/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"signup",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Email OTP",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse response\r",
+							"let response = pm.response.json();\r",
+							"\r",
+							"// Check if response contains OTP\r",
+							"if (response.email_otp) {\r",
+							"    let otpValue = response.email_otp;\r",
+							"\r",
+							"    // Save OTP to Postman environment\r",
+							"    pm.environment.set(\"otp\", otpValue);\r",
+							"    \r",
+							"    // Log the OTP\r",
+							"    console.log(\"✅ Extracted OTP:\", otpValue);\r",
+							"\r",
+							"} else if (response.message && response.message.includes(\"successful\")) {\r",
+							"    console.log(\"✅ OTP validation was already successful!\");\r",
+							"\r",
+							"} else {\r",
+							"    console.log(\"❌ OTP not found in response!\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/get-email-otp/?emailaddress={{email}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"get-email-otp",
+						""
+					],
+					"query": [
+						{
+							"key": "emailaddress",
+							"value": "{{email}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OTP Validation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse response\r",
+							"let response = pm.response.json();\r",
+							"\r",
+							"// Check if email authentication was successful\r",
+							"if (response.message && response.message.includes(\"successful\")) {\r",
+							"    console.log(\"✅ OTP validation was successful!\");\r",
+							"\r",
+							"} else {\r",
+							"    console.log(\"❌ OTP validation failed!\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"emailaddress\": \"{{email}}\",\r\n  \"otp\": \"{{otp}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/email-otp-validation/?emailaddress={{email}}&email_otp={{otp}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"email-otp-validation",
+						""
+					],
+					"query": [
+						{
+							"key": "emailaddress",
+							"value": "{{email}}"
+						},
+						{
+							"key": "email_otp",
+							"value": "{{otp}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete user by email",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"🗑 Attempting to delete user:\", pm.environment.get(\"email\"));\r",
+							"\r",
+							"// Check if deletion was successful\r",
+							"if (pm.response.code === 200) {\r",
+							"    console.log(\"✅ User deleted successfully!\");\r",
+							"    pm.environment.unset(\"email\"); // Clean up email after deletion\r",
+							"} else {\r",
+							"    console.log(\"❌ User deletion failed! Status Code:\", pm.response.code);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/delete-user-by-email/?emailaddress={{email}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"delete-user-by-email",
+						""
+					],
+					"query": [
+						{
+							"key": "emailaddress",
+							"value": "{{email}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Resend email OTP",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Call the GET OTP API after resending\r",
+							"pm.sendRequest({\r",
+							"    url: `https://developapi.instade.ai/get-email-otp/?emailaddress=${pm.environment.get(\"email\")}`,\r",
+							"    method: \"GET\",\r",
+							"    header: {\r",
+							"        \"Content-Type\": \"application/json\"\r",
+							"    }\r",
+							"}, function (err, response) {\r",
+							"    if (err) {\r",
+							"        console.log(\"❌ Error fetching OTP after resending:\", err);\r",
+							"    } else {\r",
+							"        let jsonResponse = response.json();\r",
+							"        if (jsonResponse.email_otp) {\r",
+							"            pm.environment.set(\"otp\", jsonResponse.email_otp);\r",
+							"            console.log(`✅ Resent OTP Retrieved: ${jsonResponse.email_otp}`);\r",
+							"        } else {\r",
+							"            console.log(\"❌ OTP not found after resending!\");\r",
+							"        }\r",
+							"    }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"emailaddress\": \"{{email}}\",\r\n  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/resend-email-otp/?emailaddress={{email}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"resend-email-otp",
+						""
+					],
+					"query": [
+						{
+							"key": "emailaddress",
+							"value": "{{email}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    console.log(\"✅ Login was successful!\");\r",
+							"\r",
+							"    let responseData = pm.response.json();\r",
+							"\r",
+							"    // Log which password was used\r",
+							"    const pwdUsed = pm.environment.get(\"password\");\r",
+							"    console.log(\"🟢 Logged in using password:\", pwdUsed);\r",
+							"\r",
+							"    // ✅ Store JWT token for authorization\r",
+							"    if (responseData.user && responseData.user.token) {\r",
+							"        pm.environment.set(\"token\", responseData.user.token);\r",
+							"        console.log(\"🔐 Stored JWT token in environment variable: token\");\r",
+							"    } else {\r",
+							"        console.log(\"⚠ Token not found in login response.\");\r",
+							"    }\r",
+							"\r",
+							"    // ✅ Store actual user ID (used for deleting user or fetching profile)\r",
+							"    if (responseData.user && responseData.user.User_Id_No) {\r",
+							"        pm.environment.set(\"user_id\", responseData.user.User_Id_No);\r",
+							"        console.log(\"🆔 Stored user_id:\", responseData.user.User_Id_No);\r",
+							"    } else {\r",
+							"        console.log(\"⚠ User_Id_No not found in login response.\");\r",
+							"    }\r",
+							"\r",
+							"} else {\r",
+							"    console.log(\"❌ Login failed! Status Code:\", pm.response.code);\r",
+							"    try {\r",
+							"        console.log(\"🪵 Response:\", pm.response.json());\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Unable to parse JSON response.\");\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const email = pm.environment.get(\"email\");\r",
+							"const password = pm.environment.get(\"password\");\r",
+							"\r",
+							"console.log(\"🔐 Attempting login...\");\r",
+							"console.log(\"📧 Email      :\", email);\r",
+							"console.log(\"🔑 Password   :\", password);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email_mobile\": \"{{email}}\",\r\n  \"Id_password\": \"{{password}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/login/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Forget Password",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    console.log(\"✅ Reset email was sent successfully!\");\r",
+							"    let responseData = pm.response.json();\r",
+							"    console.log(\"Response Message:\", responseData.message);\r",
+							"} else {\r",
+							"    console.log(\"❌ Reset email failed! Status Code:\", pm.response.code);\r",
+							"    console.log(\"Response:\", pm.response.json());\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"Id_emailaddress\": \"{{email}}\"\r\n} ",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/forgot-password/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"forgot-password",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reset Password",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response) {\r",
+							"    if (pm.response.code === 200) {\r",
+							"        console.log(\"✅ Password reset successful.\");\r",
+							"\r",
+							"        // Update password in environment\r",
+							"        const newPassword = \"Password@1\";\r",
+							"        pm.environment.set(\"password\", newPassword);\r",
+							"        console.log(\"🔄 Updated environment variable 'password' to new password.\");\r",
+							"    } else {\r",
+							"        console.log(\"❌ Password reset failed. Status Code:\", pm.response.code);\r",
+							"        try {\r",
+							"            console.log(\"Response:\", pm.response.json());\r",
+							"        } catch (e) {\r",
+							"            console.log(\"⚠ Unable to parse JSON response.\");\r",
+							"        }\r",
+							"    }\r",
+							"} else {\r",
+							"    console.log(\"❌ No response object found. Request might have failed completely.\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"Id_new_password\": \"Password@1\",\r\n  \"Id_confirm_new_password\": \"Password@1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/reset-password/?emailaddress={{email}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"reset-password",
+						""
+					],
+					"query": [
+						{
+							"key": "emailaddress",
+							"value": "{{email}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log(\"Deleting user_id:\", pm.environment.get(\"user_id\"));\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the DELETE request response\r",
+							"let response = pm.response.json();\r",
+							"\r",
+							"// Check if the user was successfully deleted\r",
+							"if (pm.response.code === 200 && response.message && response.message === \"User marked as deleted successfully.\") {\r",
+							"    console.log(`✅ User with user_id ${pm.environment.get(\"user_id\")} has been deleted successfully.`);\r",
+							"} else {\r",
+							"    console.log(`❌ Failed to delete user with user_id ${pm.environment.get(\"user_id\")}.`);\r",
+							"    console.log(\"Response:\", response);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/delete-user/?user_id={{user_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"delete-user",
+						""
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{user_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    console.log(\"✅ User Profile fetched successfully!\");\r",
+							"\r",
+							"    let profile = pm.response.json();\r",
+							"\r",
+							"    console.log(\"👤 User Profile Details:\");\r",
+							"    console.log(\"-------------------------\");\r",
+							"\r",
+							"    // Log all key-value pairs, regardless of nesting\r",
+							"    for (let key in profile) {\r",
+							"        let value = profile[key];\r",
+							"\r",
+							"        // If the value is an object (e.g., nested user), log its properties too\r",
+							"        if (typeof value === 'object' && value !== null) {\r",
+							"            console.log(`${key}:`);\r",
+							"            for (let subKey in value) {\r",
+							"                console.log(`  ${subKey}: ${value[subKey]}`);\r",
+							"            }\r",
+							"        } else {\r",
+							"            console.log(`${key}: ${value}`);\r",
+							"        }\r",
+							"    }\r",
+							"\r",
+							"    console.log(\"-------------------------\");\r",
+							"\r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to fetch User Profile. Status Code:\", pm.response.code);\r",
+							"    try {\r",
+							"        console.log(\"Response:\", pm.response.json());\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Error parsing response JSON.\");\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/user-profile/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"user-profile",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"function getRandomElement(arr) {\r",
+							"    return arr[Math.floor(Math.random() * arr.length)];\r",
+							"}\r",
+							"\r",
+							"const firstSyllables = [\"Sai\", \"Chi\", \"Ra\", \"Ma\", \"Vi\", \"Ka\", \"Su\", \"An\", \"Na\", \"De\"];\r",
+							"const lastSyllables = [\"van\", \"sh\", \"rak\", \"nath\", \"resh\", \"gan\", \"rayan\", \"thiran\", \"mani\", \"kumaran\"];\r",
+							"\r",
+							"function generateName(minLength) {\r",
+							"    let name = \"\";\r",
+							"    while (name.length < minLength) {\r",
+							"        name = getRandomElement(firstSyllables) + getRandomElement(lastSyllables);\r",
+							"    }\r",
+							"    return name;\r",
+							"}\r",
+							"\r",
+							"const firstName = generateName(4);\r",
+							"const lastName = generateName(4);\r",
+							"\r",
+							"pm.environment.set(\"update_firstname\", firstName);\r",
+							"pm.environment.set(\"update_lastname\", lastName);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    console.log(\"✅ User profile updated successfully!\");\r",
+							"\r",
+							"    let responseData = pm.response.json();\r",
+							"    console.log(\"🧾 Updated Profile Response:\", responseData);\r",
+							"\r",
+							"    console.log(\"🔄 Updated First Name:\", pm.environment.get(\"update_firstname\"));\r",
+							"    console.log(\"🔄 Updated Last Name:\", pm.environment.get(\"update_lastname\"));\r",
+							"} else {\r",
+							"    console.log(`❌ Failed to update profile. Status Code: ${pm.response.code}`);\r",
+							"    console.log(\"Response:\", pm.response.json());\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"Id_firstname\": \"{{update_firstname}}\",\r\n  \"Id_lastname\": \"{{update_lastname}}\"\r\n}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/update-user/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"update-user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload Profile Image",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    console.log(\"✅ Profile image uploaded successfully!\");\r",
+							"    \r",
+							"    let res = pm.response.json();\r",
+							"    console.log(\"📦 Response Body:\");\r",
+							"    console.log(JSON.stringify(res, null, 2));\r",
+							"\r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to upload profile image.\");\r",
+							"    console.log(\"📡 Status Code:\", pm.response.code);\r",
+							"\r",
+							"    try {\r",
+							"        let errorRes = pm.response.json();\r",
+							"        console.log(\"❗ Error Details:\");\r",
+							"        console.log(JSON.stringify(errorRes, null, 2));\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Response is not JSON.\");\r",
+							"        console.log(pm.response.text());\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/KHS112/Downloads/B H saikiran image.jpeg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/upload-profile-image/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"upload-profile-image",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Profile Image",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    console.log(\"✅ Profile image deleted successfully!\");\r",
+							"    \r",
+							"    let response = pm.response.json();\r",
+							"    console.log(\"📦 Response Body:\");\r",
+							"    console.log(JSON.stringify(response, null, 2));\r",
+							"\r",
+							"    // Optionally log additional useful information\r",
+							"    console.log(\"🎯 Status Code:\", pm.response.code);\r",
+							"    console.log(\"🕒 Timestamp:\", new Date().toISOString());\r",
+							"    \r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to delete profile image.\");\r",
+							"    console.log(\"📡 Status Code:\", pm.response.code);\r",
+							"\r",
+							"    try {\r",
+							"        let errorResponse = pm.response.json();\r",
+							"        console.log(\"❗ Error Details:\");\r",
+							"        console.log(JSON.stringify(errorResponse, null, 2));\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Response is not in JSON format.\");\r",
+							"        console.log(pm.response.text());\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/delete-profile-image/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"delete-profile-image",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Profile Image",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    console.log(\"✅ Profile image fetched successfully!\");\r",
+							"\r",
+							"    // Check for Content-Type header to confirm it's an image\r",
+							"    const contentType = pm.response.headers.get('Content-Type');\r",
+							"    if (contentType && contentType.includes('image')) {\r",
+							"        console.log(\"🖼️ Image content received with Content-Type: \" + contentType);\r",
+							"    } else {\r",
+							"        console.log(\"⚠ The response is not an image.\");\r",
+							"    }\r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to fetch profile image. Status Code: \" + pm.response.code);\r",
+							"    console.log(\"Response Body:\", pm.response.text());\r",
+							"}\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/get-profile-image/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"get-profile-image",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Profile Image URL",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/get-profile-image-url/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"get-profile-image-url",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Basic Details",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Example Indian cities and their states\r",
+							"const citiesAndStates = [\r",
+							"    { city: \"Hyderabad\", state: \"Telangana\" },\r",
+							"    { city: \"Bangalore\", state: \"Karnataka\" },\r",
+							"    { city: \"Chennai\", state: \"Tamil Nadu\" },\r",
+							"    { city: \"Mumbai\", state: \"Maharashtra\" },\r",
+							"    { city: \"Eluru\", state: \"Andhra Pradesh\" },\r",
+							"    { city: \"Kochi\", state: \"Kerala\" },\r",
+							"    { city: \"Bhopal\", state: \"Madhya Pradesh\" },\r",
+							"    { city: \"Jaipur\", state: \"Rajasthan\" },\r",
+							"    { city: \"Patna\", state: \"Bihar\" }\r",
+							"];\r",
+							"\r",
+							"// Random project names\r",
+							"const projectNames = [\"Infosys Hub\", \"HCL Tech\", \"TCS Launchpad\", \"Wipro Nexus\", \"Zeta Innovations\"];\r",
+							"\r",
+							"// Sample URLs\r",
+							"const urls = [\"https://www.facebook.com\", \"https://www.google.com\", \"https://www.linkedin.com\", \"https://www.amazon.in\"];\r",
+							"\r",
+							"// Pick random values\r",
+							"const randomLocation = citiesAndStates[Math.floor(Math.random() * citiesAndStates.length)];\r",
+							"const randomProject = projectNames[Math.floor(Math.random() * projectNames.length)];\r",
+							"const randomURL = urls[Math.floor(Math.random() * urls.length)];\r",
+							"\r",
+							"// Set environment variables\r",
+							"pm.environment.set(\"project_id\", pm.environment.get(\"user_id\"));\r",
+							"pm.environment.set(\"target_location\", randomLocation.city);\r",
+							"pm.environment.set(\"state\", randomLocation.state);\r",
+							"pm.environment.set(\"project_name\", randomProject);\r",
+							"pm.environment.set(\"website_url\", randomURL);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200 || pm.response.code === 201) {\r",
+							"    console.log(\"✅ Project created successfully!\");\r",
+							"    console.log(\"📌 Project Name:\", pm.environment.get(\"project_name\"));\r",
+							"    console.log(\"📍 Location:\", pm.environment.get(\"target_location\") + \", \" + pm.environment.get(\"state\"));\r",
+							"    console.log(\"🔗 Website:\", pm.environment.get(\"website_url\"));\r",
+							"\r",
+							"    // ✅ Save returned project_id from response\r",
+							"    let responseData = pm.response.json();\r",
+							"    \r",
+							"    // Check for project_id in response\r",
+							"    if (responseData && responseData.data && responseData.data.project_id) {\r",
+							"        pm.environment.set(\"project_id\", responseData.data.project_id);\r",
+							"        console.log(\"✅ Stored project_id:\", responseData.data.project_id);\r",
+							"    } else {\r",
+							"        console.log(\"⚠ project_id not found in response.\");\r",
+							"    }\r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to create project. Status Code:\", pm.response.code);\r",
+							"    try {\r",
+							"        console.log(\"Response:\", pm.response.json());\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Could not parse error response.\");\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"project_id\": \"{{project_id}}\",\r\n  \"target_location\": \"{{target_location}}\",\r\n  \"website_url\": \"{{website_url}}\",\r\n  \"project_name\": \"{{project_name}}\",\r\n  \"state\": \"{{state}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/create-basic-details/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"create-basic-details",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Business Information",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Set main category\r",
+							"const category = \"Real Estate Construction\";\r",
+							"\r",
+							"// Valid subcategories under \"Real Estate Construction\"\r",
+							"const subcategories = [\r",
+							"    \"Villas Construction\",\r",
+							"    \"Commercial Buildings Construction\",\r",
+							"    \"Residential Apartments Construction\",\r",
+							"    \"Residential Gated Community Construction\"\r",
+							"];\r",
+							"\r",
+							"// Pick a random subcategory\r",
+							"const randomSubcategory = subcategories[Math.floor(Math.random() * subcategories.length)];\r",
+							"\r",
+							"// Set environment variables\r",
+							"pm.environment.set(\"business_category\", category);\r",
+							"pm.environment.set(\"business_sub_category\", randomSubcategory);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200 || pm.response.code === 201) {\r",
+							"    console.log(\"✅ Successfully updated business information for the project!\");\r",
+							"    console.log(\"📌 Project ID:\", pm.environment.get(\"project_id\"));\r",
+							"    console.log(\"🏢 Business Category:\", pm.environment.get(\"business_category\"));\r",
+							"    console.log(\"🏗️ Subcategory:\", pm.environment.get(\"business_sub_category\"));\r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to update business information. Status Code:\", pm.response.code);\r",
+							"    try {\r",
+							"        console.log(\"Response:\", pm.response.json());\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Could not parse error response.\");\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"project_id\": \"{{project_id}}\",\r\n  \"business_category\": \"{{business_category}}\",\r\n  \"business_sub_category\": \"{{business_sub_category}}\"\r\n}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/create-business-information/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"create-business-information",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Project Goal",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// List of possible project goals\r",
+							"const goals = [\"Sales\", \"Brand Awareness\", \"Brand Consideration\", \"Leads\"];\r",
+							"\r",
+							"// Pick one randomly\r",
+							"const selectedGoal = goals[Math.floor(Math.random() * goals.length)];\r",
+							"\r",
+							"// Save to environment as an array (since API expects a list)\r",
+							"pm.environment.set(\"project_goal\", JSON.stringify([selectedGoal]));\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    console.log(\"✅ Project goal updated successfully.\");\r",
+							"    console.log(\"🎯 Goal Set:\", pm.environment.get(\"project_goal\"));\r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to update project goal. Status:\", pm.response.code);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \r\n  \"project_goal\": {{project_goal}}\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/create-project-goals/?project_id={{project_id}}\n",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"create-project-goals",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}\n"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "About Project",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Random descriptions for \"about_project_info\"\r",
+							"const aboutInfoOptions = [\r",
+							"    \"A premium residential community with modern amenities.\",\r",
+							"    \"A commercial complex designed for tech startups.\",\r",
+							"    \"Luxury villas located in a serene natural setting.\",\r",
+							"    \"Smart apartments tailored for urban living.\",\r",
+							"    \"Eco-friendly construction focusing on sustainability.\"\r",
+							"];\r",
+							"\r",
+							"// Random keyword sets\r",
+							"const keywordOptions = [\r",
+							"    \"luxury, gated community, smart homes\",\r",
+							"    \"commercial, workspace, tech park\",\r",
+							"    \"eco-friendly, solar, green building\",\r",
+							"    \"apartments, city view, modern living\",\r",
+							"    \"villa, spacious, private garden\"\r",
+							"];\r",
+							"\r",
+							"// Random project features\r",
+							"const featureOptions = [\r",
+							"    \"Swimming pool, gym, clubhouse\",\r",
+							"    \"24x7 security, power backup, CCTV\",\r",
+							"    \"Rooftop garden, co-working space\",\r",
+							"    \"Smart access, EV charging, concierge\",\r",
+							"    \"Kids play area, jogging track, spa\"\r",
+							"];\r",
+							"\r",
+							"// Randomly select values\r",
+							"const aboutProjectInfo = aboutInfoOptions[Math.floor(Math.random() * aboutInfoOptions.length)];\r",
+							"const keywords = keywordOptions[Math.floor(Math.random() * keywordOptions.length)];\r",
+							"const projectFeatures = featureOptions[Math.floor(Math.random() * featureOptions.length)];\r",
+							"\r",
+							"// Set environment variables\r",
+							"pm.environment.set(\"about_project_info\", aboutProjectInfo);\r",
+							"pm.environment.set(\"keywords\", keywords);\r",
+							"pm.environment.set(\"project_features\", projectFeatures);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200 || pm.response.code === 201) {\r",
+							"    console.log(\"✅ Project information updated successfully!\");\r",
+							"\r",
+							"    // Display the values that were sent\r",
+							"    console.log(\"📝 About Project Info:\", pm.environment.get(\"about_project_info\"));\r",
+							"    console.log(\"🔑 Keywords:\", pm.environment.get(\"keywords\"));\r",
+							"    console.log(\"✨ Project Features:\", pm.environment.get(\"project_features\"));\r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to update project information. Status Code:\", pm.response.code);\r",
+							"    try {\r",
+							"        console.log(\"Response:\", pm.response.json());\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Could not parse error response.\");\r",
+							"    }\r",
+							"}\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"about_project_info\": \"{{about_project_info}}\",\r\n  \"keywords\": \"{{keywords}}\",\r\n  \"project_features\": \"{{project_features}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/create-about-project/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"create-about-project",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logo Color",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Utility to generate a random hex color\r",
+							"function getRandomHexColor() {\r",
+							"    const letters = '0123456789ABCDEF';\r",
+							"    let color = '#';\r",
+							"    for (let i = 0; i < 6; i++) {\r",
+							"        color += letters[Math.floor(Math.random() * 16)];\r",
+							"    }\r",
+							"    return color;\r",
+							"}\r",
+							"\r",
+							"// Generate random colors\r",
+							"const primaryColor = getRandomHexColor();\r",
+							"const secondaryColor = getRandomHexColor();\r",
+							"\r",
+							"// Set environment variables\r",
+							"pm.environment.set(\"logo_primary_color\", primaryColor);\r",
+							"pm.environment.set(\"logo_secondary_color\", secondaryColor);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200 || pm.response.code === 201) {\r",
+							"    console.log(\"✅ Logo created successfully!\");\r",
+							"    console.log(\"🎨 Primary Color:\", pm.environment.get(\"logo_primary_color\"));\r",
+							"    console.log(\"🎨 Secondary Color:\", pm.environment.get(\"logo_secondary_color\"));\r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to create logo. Status Code:\", pm.response.code);\r",
+							"    try {\r",
+							"        console.log(\"Response:\", pm.response.json());\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Could not parse error response.\");\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"logo_primary_color\": \"{{logo_primary_color}}\",\r\n  \"logo_secondary_color\": \"{{logo_secondary_color}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/create-logo-color/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"create-logo-color",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Contact Details",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Utility to generate random Indian phone numbers\r",
+							"function getRandomPhoneNumber() {\r",
+							"    const prefix = [\"9\", \"8\", \"7\"];\r",
+							"    let number = prefix[Math.floor(Math.random() * prefix.length)];\r",
+							"    for (let i = 0; i < 9; i++) {\r",
+							"        number += Math.floor(Math.random() * 10);\r",
+							"    }\r",
+							"    return number;\r",
+							"}\r",
+							"\r",
+							"// Utility to generate random email\r",
+							"function getRandomEmail(name) {\r",
+							"    const domains = [\"gmail.com\", \"yahoo.com\", \"rediffmail.com\", \"outlook.com\"];\r",
+							"    const domain = domains[Math.floor(Math.random() * domains.length)];\r",
+							"    return name.toLowerCase() + Math.floor(Math.random() * 10000) + \"@\" + domain;\r",
+							"}\r",
+							"\r",
+							"// Utility to generate random address\r",
+							"const addresses = [\r",
+							"    \"12 MG Road, Bengaluru, Karnataka\",\r",
+							"    \"45 Sector 18, Noida, Uttar Pradesh\",\r",
+							"    \"7 T Nagar, Chennai, Tamil Nadu\",\r",
+							"    \"29 Gariahat, Kolkata, West Bengal\",\r",
+							"    \"101 Andheri West, Mumbai, Maharashtra\",\r",
+							"    \"205 Banjara Hills, Hyderabad, Telangana\",\r",
+							"    \"88 Vellayambalam, Thiruvananthapuram, Kerala\"\r",
+							"];\r",
+							"const randomAddress = addresses[Math.floor(Math.random() * addresses.length)];\r",
+							"\r",
+							"// Generate and set variables\r",
+							"pm.environment.set(\"primary_country_code\", \"ctry_code_91\");\r",
+							"pm.environment.set(\"secondary_country_code\", \"ctry_code_91\");\r",
+							"\r",
+							"const firstName = \"user\" + Math.floor(Math.random() * 1000);\r",
+							"const secondName = \"contact\" + Math.floor(Math.random() * 1000);\r",
+							"\r",
+							"pm.environment.set(\"primary_phone_number\", getRandomPhoneNumber());\r",
+							"pm.environment.set(\"secondary_phone_number\", getRandomPhoneNumber());\r",
+							"pm.environment.set(\"primary_email_address\", getRandomEmail(firstName));\r",
+							"pm.environment.set(\"secondary_email_address\", getRandomEmail(secondName));\r",
+							"pm.environment.set(\"address\", randomAddress);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200 || pm.response.code === 201) {\r",
+							"    console.log(\"✅ Contact details created successfully!\");\r",
+							"    console.log(\"📞 Primary:\", pm.environment.get(\"primary_country_code\"), pm.environment.get(\"primary_phone_number\"));\r",
+							"    console.log(\"📞 Secondary:\", pm.environment.get(\"secondary_country_code\"), pm.environment.get(\"secondary_phone_number\"));\r",
+							"    console.log(\"📧 Primary Email:\", pm.environment.get(\"primary_email_address\"));\r",
+							"    console.log(\"📧 Secondary Email:\", pm.environment.get(\"secondary_email_address\"));\r",
+							"    console.log(\"📍 Address:\", pm.environment.get(\"address\"));\r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to create contact details. Status Code:\", pm.response.code);\r",
+							"    try {\r",
+							"        console.log(\"Response:\", pm.response.json());\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Could not parse error response.\");\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"primary_country_code\": \"{{primary_country_code}}\",\r\n  \"primary_phone_number\": \"{{primary_phone_number}}\",\r\n  \"secondary_country_code\": \"{{secondary_country_code}}\",\r\n  \"secondary_phone_number\": \"{{secondary_phone_number}}\",\r\n  \"primary_email_address\": \"{{primary_email_address}}\",\r\n  \"secondary_email_address\": \"{{secondary_email_address}}\",\r\n  \"address\": \"{{address}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/create-contact-details/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"create-contact-details",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Project Details Submit",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200 || pm.response.code === 201) {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    console.log(\"✅ Project Created Successfully!\");\r",
+							"    \r",
+							"    if (responseData.data) {\r",
+							"        const projectId = responseData.data.project_id;\r",
+							"        const psid = responseData.data.psid;\r",
+							"        const status = responseData.data.project_creation_status;\r",
+							"\r",
+							"        pm.environment.set(\"project_id\", projectId);\r",
+							"        pm.environment.set(\"psid\", psid);\r",
+							"\r",
+							"        console.log(\"📌 Project ID:\", projectId);\r",
+							"        console.log(\"🆔 PSID:\", psid);\r",
+							"        console.log(\"🚦 Status:\", status);\r",
+							"    } else {\r",
+							"        console.log(\"⚠️ Response 'data' field not found.\");\r",
+							"    }\r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to create project. Status Code:\", pm.response.code);\r",
+							"    try {\r",
+							"        console.log(\"Response:\", pm.response.json());\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠️ Could not parse error response.\");\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/project-details-submit/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"project-details-submit",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Project",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"🔄 Updating project with the following details:\");\r",
+							"console.log(\"📌 Project Name:\", pm.environment.get(\"project_name\"));\r",
+							"console.log(\"📍 Location:\", pm.environment.get(\"target_location\"), \",\", pm.environment.get(\"state\"));\r",
+							"console.log(\"🌐 Website:\", pm.environment.get(\"website_url\"));\r",
+							"console.log(\"🏢 Category:\", pm.environment.get(\"business_category\"));\r",
+							"console.log(\"📂 Subcategory:\", pm.environment.get(\"business_sub_category\"));\r",
+							"console.log(\"🎯 Goals:\", pm.environment.get(\"project_goal\"));\r",
+							"console.log(\"📝 About:\", pm.environment.get(\"about_project_info\"));\r",
+							"console.log(\"🔑 Keywords:\", pm.environment.get(\"keywords\"));\r",
+							"console.log(\"✨ Features:\", pm.environment.get(\"project_features\"));\r",
+							"console.log(\"🎨 Primary Logo Color:\", pm.environment.get(\"logo_primary_color\"));\r",
+							"console.log(\"🎨 Secondary Logo Color:\", pm.environment.get(\"logo_secondary_color\"));\r",
+							"console.log(\"📞 Primary:\", pm.environment.get(\"primary_country_code\"), pm.environment.get(\"primary_phone_number\"));\r",
+							"console.log(\"📞 Secondary:\", pm.environment.get(\"secondary_country_code\"), pm.environment.get(\"secondary_phone_number\"));\r",
+							"console.log(\"📧 Primary Email:\", pm.environment.get(\"primary_email_address\"));\r",
+							"console.log(\"📧 Secondary Email:\", pm.environment.get(\"secondary_email_address\"));\r",
+							"console.log(\"🏠 Address:\", pm.environment.get(\"address\"));\r",
+							"\r",
+							"if (pm.response.code === 200 || pm.response.code === 201) {\r",
+							"    console.log(\"✅ Project update successful!\");\r",
+							"} else {\r",
+							"    console.log(\"❌ Project update failed. Status Code:\", pm.response.code);\r",
+							"    try {\r",
+							"        console.log(\"Response:\", pm.response.json());\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Error parsing response body.\");\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"basic_details\": {\r\n    \"project_id\": \"{{project_id}}\",\r\n    \"target_location\": \"{{target_location}}\",\r\n    \"website_url\": \"{{website_url}}\",\r\n    \"project_name\": \"{{project_name}}\",\r\n    \"state\": \"{{state}}\"\r\n  },\r\n  \"business_information\": {\r\n    \"business_category\": \"{{business_category}}\",\r\n    \"business_sub_category\": \"{{business_sub_category}}\"\r\n  },\r\n  \"project_goals\": {\r\n    \"project_goal\": {{project_goal}}\r\n  },\r\n  \"about_project\": {\r\n    \"about_project_info\": \"{{about_project_info}}\",\r\n    \"keywords\": \"{{keywords}}\",\r\n    \"project_features\": \"{{project_features}}\"\r\n  },\r\n  \"logo_color\": {\r\n    \"logo_primary_color\": \"{{logo_primary_color}}\",\r\n    \"logo_secondary_color\": \"{{logo_secondary_color}}\"\r\n  },\r\n  \"contact_details\": {\r\n    \"primary_country_code\": \"{{primary_country_code}}\",\r\n    \"primary_phone_number\": \"{{primary_phone_number}}\",\r\n    \"secondary_country_code\": \"{{secondary_country_code}}\",\r\n    \"secondary_phone_number\": \"{{secondary_phone_number}}\",\r\n    \"primary_email_address\": \"{{primary_email_address}}\",\r\n    \"secondary_email_address\": \"{{secondary_email_address}}\",\r\n    \"address\": \"{{address}}\"\r\n  }\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/update-project/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"update-project",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Project",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/get-project/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"get-project",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Project",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/delete-project/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"delete-project",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Project Logo",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/delete-project-logo/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"delete-project-logo",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Projects",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/get-all-projects/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"get-all-projects",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User Projects List",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/get-user-projects_list/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"get-user-projects_list",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User active projects count",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/get_user_active_projects_count/",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"get_user_active_projects_count",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload Project Logo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"🔄 Uploading project logo with the following details:\");\r",
+							"\r",
+							"const logoFile = pm.request.body.formdata.find(item => item.key === 'logo_file');\r",
+							"const primaryColor = pm.environment.get('logo_primary_color');\r",
+							"const secondaryColor = pm.environment.get('logo_secondary_color');\r",
+							"\r",
+							"// Log project logo details\r",
+							"console.log(\"🖼️ Logo File: \", logoFile ? logoFile.src : 'No logo file was selected');\r",
+							"console.log(\"🎨 Primary Logo Color:\", primaryColor);\r",
+							"console.log(\"🎨 Secondary Logo Color:\", secondaryColor);\r",
+							"\r",
+							"if (pm.response.code === 200 || pm.response.code === 201) {\r",
+							"    console.log(\"✅ Logo uploaded successfully!\");\r",
+							"    console.log(\"📥 Response:\", pm.response.json());\r",
+							"} else {\r",
+							"    console.log(\"❌ Logo upload failed. Status Code:\", pm.response.code);\r",
+							"    try {\r",
+							"        console.log(\"Response:\", pm.response.json());\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Error parsing response body.\");\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/KHS112/Downloads/FB_IMG_1585965260671.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/upload-project-logo/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"upload-project-logo",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Project Logo",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/get-project-logo/{{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"get-project-logo",
+						"{{project_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Project Logo URL",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/get-project-logo-url/{{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"get-project-logo-url",
+						"{{project_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Teams",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check if the response status is successful\r",
+							"if (pm.response.code === 200 || pm.response.code === 201) {\r",
+							"    console.log(\"✅ Team details retrieved successfully.\");\r",
+							"\r",
+							"    // Parse the response to get the team ID\r",
+							"    let responseData = pm.response.json();\r",
+							"\r",
+							"    // Check if the response contains a team ID\r",
+							"    if (responseData.team_id) {\r",
+							"        let teamId = responseData.team_id;\r",
+							"\r",
+							"        // Save the team ID in the environment variable\r",
+							"        pm.environment.set(\"team_id\", teamId);\r",
+							"        console.log(\"✅ Stored team_id:\", teamId);\r",
+							"    } else {\r",
+							"        console.log(\"⚠ Team ID not found in response.\");\r",
+							"    }\r",
+							"} else {\r",
+							"    console.log(\"❌ Failed to get team details. Status Code:\", pm.response.code);\r",
+							"    try {\r",
+							"        console.log(\"Response:\", pm.response.json());\r",
+							"    } catch (e) {\r",
+							"        console.log(\"⚠ Error parsing response.\");\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://developapi.instade.ai/get_team/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"get_team",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Team Member",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// ONLY generate email, do NOT touch role_id\r",
+							"const randomEmail = `user${Math.floor(Math.random() * 10000)}@example.com`;\r",
+							"pm.environment.set(\"email\", randomEmail);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200 || pm.response.code === 201) {\r",
+							"    const responseEmail = pm.environment.get(\"email\");\r",
+							"    pm.environment.set(\"delete_email\", responseEmail); // Set for delete use\r",
+							"    console.log(\"Stored for deletion:\", responseEmail);\r",
+							"}\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"team_id\": \"{{team_id}}\",\r\n  \"email\": \"{{random_email}}\",\r\n  \"role_id\": \"{{role_id}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/add_team_member/?team_id={{team_id}}&email={{email}}&role_id={{role_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"add_team_member",
+						""
+					],
+					"query": [
+						{
+							"key": "team_id",
+							"value": "{{team_id}}"
+						},
+						{
+							"key": "email",
+							"value": "{{email}}"
+						},
+						{
+							"key": "role_id",
+							"value": "{{role_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View Team Member",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "https://developapi.instade.ai/view_team_members/?project_id={{project_id}}",
+					"protocol": "https",
+					"host": [
+						"developapi",
+						"instade",
+						"ai"
+					],
+					"path": [
+						"view_team_members",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "firstname",
+			"value": ""
+		},
+		{
+			"key": "lastname",
+			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
+		}
+	]
+}
